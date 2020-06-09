@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
@@ -51,5 +52,10 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// 错误信息
         /// </summary>
         public string ErrMsg { get; set; }
+
+        /// <summary>
+        /// 具有申明的身份信息
+        /// </summary>
+        public ClaimsIdentity ClaimsIdentity { get; set; }
     }
 }

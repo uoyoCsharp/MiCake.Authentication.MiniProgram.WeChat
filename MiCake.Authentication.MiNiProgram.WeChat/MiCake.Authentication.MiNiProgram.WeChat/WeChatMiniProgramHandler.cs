@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -43,29 +42,9 @@ namespace MiCake.Authentication.MiniProgram.WeChat
 
             if (string.IsNullOrEmpty(tokens.OpenId) || string.IsNullOrEmpty(tokens.SessionKey))
             {
-                return HandleRequestResult.Fail("没有接受到微信服务器所返回的OpenID和SessionKey。");
+                return HandleRequestResult.Fail("没有接收到微信服务器所返回的OpenID和SessionKey。");
             }
-
-            var identity = new ClaimsIdentity(ClaimsIssuer);
-            var properties = new AuthenticationProperties();
-            if (Options.SaveTokens)
-            {
-            }
-
-            var ticket = await CreateTicketAsync(identity, properties, tokens);
-            if (ticket != null)
-            {
-                return HandleRequestResult.Success(ticket);
-            }
-            else
-            {
-                return HandleRequestResult.Fail("微信小程序登录验证失败。");
-            }
-        }
-
-        protected virtual Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, WeChatTokenResponse tokens)
-        {
-            return Task.FromResult<AuthenticationTicket>(null);
+            return HandleRequestResult.Handle(); ;
         }
 
         protected virtual async Task<WeChatTokenResponse> ExchangeCodeAsync(string clientJsCode)
@@ -79,7 +58,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             queryStringBuilder.Append("&");
             queryStringBuilder.Append("grant_type=" + Options.WeChatGrantTtype);
 
-            var requestURL = Uri.EscapeDataString(Options.CallbackPath.Value) + queryStringBuilder.ToString();
+            var requestURL = WeChatMiniProgramDefault.AuthorizationEndpoint + queryStringBuilder.ToString();
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestURL);
             var response = await Options.Backchannel.SendAsync(requestMessage, Context.RequestAborted);

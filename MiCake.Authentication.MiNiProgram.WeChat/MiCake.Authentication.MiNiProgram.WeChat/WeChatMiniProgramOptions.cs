@@ -50,6 +50,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         {
             CallbackPath = new PathString("/signin-wechat");
             BackchannelTimeout = TimeSpan.FromSeconds(60);
+            Events = new WeChatEvents();
         }
 
         public override void Validate()

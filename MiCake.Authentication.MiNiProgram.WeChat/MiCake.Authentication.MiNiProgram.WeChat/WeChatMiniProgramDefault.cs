@@ -7,7 +7,7 @@
     {
         public const string AuthenticationScheme = "MiniProgam,WeChat";
 
-        public static readonly string DisplayName = "WeChatMiNiProgram";
+        public static readonly string DisplayName = "WeChatMiniProgram";
 
         /// <summary>
         /// 微信小程序服务端验证的url

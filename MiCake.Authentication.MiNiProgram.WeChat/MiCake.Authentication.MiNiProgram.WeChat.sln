@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiCake.Authentication.MiniProgram.WeChat", "MiCake.Authentication.MiNiProgram.WeChat\MiCake.Authentication.MiniProgram.WeChat.csproj", "{E03C3983-2C39-4A53-9DA3-4FC7228BE228}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiCake.Authentication.MiniProgram.WeChat", "MiCake.Authentication.MiNiProgram.WeChat\MiCake.Authentication.MiniProgram.WeChat.csproj", "{E03C3983-2C39-4A53-9DA3-4FC7228BE228}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatAuthentication.Sample", "WeChatAuthentication.Sample\WeChatAuthentication.Sample.csproj", "{5995174C-5588-4C74-80DB-935FEDF4AABD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{E03C3983-2C39-4A53-9DA3-4FC7228BE228}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E03C3983-2C39-4A53-9DA3-4FC7228BE228}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E03C3983-2C39-4A53-9DA3-4FC7228BE228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5995174C-5588-4C74-80DB-935FEDF4AABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5995174C-5588-4C74-80DB-935FEDF4AABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5995174C-5588-4C74-80DB-935FEDF4AABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5995174C-5588-4C74-80DB-935FEDF4AABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
