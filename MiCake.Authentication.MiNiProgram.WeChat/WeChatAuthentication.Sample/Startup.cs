@@ -1,5 +1,4 @@
 using MiCake.Authentication.MiniProgram.WeChat;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,11 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Net.Http.Headers;
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
-using WeChatAuthentication.Sample.Models;
 using WeChatAuthentication.Sample.Services;
 
 namespace WeChatAuthentication.Sample
@@ -44,7 +40,7 @@ namespace WeChatAuthentication.Sample
                     options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
 
-                    options.Events.OnWeChatServerCompleted += CreateToken;   //添加颁发JwtToken的步骤
+                    options.CustomerLoginState += CreateToken;   //添加颁发JwtToken的步骤
                 });
         }
 
@@ -69,7 +65,7 @@ namespace WeChatAuthentication.Sample
             });
         }
 
-        public async Task CreateToken(WeChatServerCompletedContext context)
+        public async Task CreateToken(CustomerLoginStateContext context)
         {
             var associateUserService = context.HttpContext.RequestServices.GetService<AssociateWeChatUser>();
 

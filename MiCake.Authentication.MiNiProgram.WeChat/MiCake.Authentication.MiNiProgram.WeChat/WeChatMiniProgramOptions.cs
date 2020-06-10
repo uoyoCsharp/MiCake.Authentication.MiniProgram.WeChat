@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Threading.Tasks;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
@@ -36,6 +37,12 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// </para>
         /// </summary>
         public string WeChatJsCodeQueryString { get; set; } = "code";
+
+        /// <summary>
+        /// 根据微信服务器返回的会话密匙进行执行自定义登录态操作。
+        /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作。
+        /// </summary>
+        public Func<CustomerLoginStateContext, Task> CustomerLoginState { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="WeChatEvents"/> used to handle authentication events.

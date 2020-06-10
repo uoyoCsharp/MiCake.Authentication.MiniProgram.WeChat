@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -44,6 +45,30 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             {
                 return HandleRequestResult.Fail("没有接收到微信服务器所返回的OpenID和SessionKey。");
             }
+
+            if (Options.CustomerLoginState == null)
+            {
+                Logger.LogWarning("当前没有提供微信小程序自定义登录态的逻辑。");
+            }
+            else
+            {
+                var exceptions = new List<Exception>();
+                try
+                {
+                    var customerLoginStateContext = new CustomerLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg);
+                    await Options.CustomerLoginState?.Invoke(customerLoginStateContext);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
+
+                if (exceptions.Count > 0)
+                {
+                    return HandleRequestResult.Fail(new AggregateException(exceptions));
+                }
+            }
+
             return HandleRequestResult.Handle(); ;
         }
 

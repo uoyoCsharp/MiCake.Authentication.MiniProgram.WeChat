@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Http;
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
     /// <summary>
-    /// 包含了微信服务器返回的信息以及当前验证处理的上下文信息
+    /// 用户进行自定义登录态操作时所需要的上下文信息
     /// </summary>
-    public class WeChatServerCompletedContext : ResultContext<WeChatMiniProgramOptions>
+    public class CustomerLoginStateContext : ResultContext<WeChatMiniProgramOptions>
     {
-        public WeChatServerCompletedContext(
+        public CustomerLoginStateContext(
             HttpContext context,
             AuthenticationScheme scheme,
             WeChatMiniProgramOptions options,

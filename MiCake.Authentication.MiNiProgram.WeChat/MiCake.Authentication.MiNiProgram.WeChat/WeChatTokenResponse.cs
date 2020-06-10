@@ -3,6 +3,10 @@ using System.Text.Json;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
+    /// <summary>
+    /// 微信小程序登录凭证校验后所返回的结果。
+    /// https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/login/auth.code2Session.html
+    /// </summary>
     public class WeChatTokenResponse : IDisposable
     {
         /// <summary>
