@@ -21,7 +21,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         {
         }
 
-        public WeChatSessionInfo(string openId,string sessionKey)
+        public WeChatSessionInfo(string openId, string sessionKey)
         {
             if (string.IsNullOrWhiteSpace(openId))
                 throw new ArgumentException($"{nameof(openId)} 不能为空!");

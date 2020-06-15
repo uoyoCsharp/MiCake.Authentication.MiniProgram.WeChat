@@ -25,7 +25,7 @@ namespace WeChatAuthentication.Sample.Controllers
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException($"key 不能为空");
 
-            var weChatSession =await _weChatSessionStore.GetSessionInfo(key);
+            var weChatSession = await _weChatSessionStore.GetSessionInfo(key);
             return _associateWeChatUser.GetUserToken(weChatSession.OpenId);
         }
     }
