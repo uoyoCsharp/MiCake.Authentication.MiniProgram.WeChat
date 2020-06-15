@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -52,10 +53,19 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             }
             else
             {
+                string sessionInfoKey = null;
+
+                if (Options.SaveSessionKeyToCache)
+                {
+                    var sessionStore = Context.RequestServices.GetService<IWeChatSessionInfoStore>();
+                    if (sessionStore != null)
+                        sessionInfoKey = await sessionStore.StoreAsync(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
+                }
+
                 var exceptions = new List<Exception>();
                 try
                 {
-                    var customerLoginStateContext = new CustomerLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg);
+                    var customerLoginStateContext = new CustomerLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionInfoKey);
                     await Options.CustomerLoginState?.Invoke(customerLoginStateContext);
                 }
                 catch (Exception ex)

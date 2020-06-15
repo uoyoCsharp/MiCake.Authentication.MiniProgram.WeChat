@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiCake.Authentication.MiniProgram.WeChat", "MiCake.Authentication.MiNiProgram.WeChat\MiCake.Authentication.MiniProgram.WeChat.csproj", "{E03C3983-2C39-4A53-9DA3-4FC7228BE228}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatAuthentication.Sample", "WeChatAuthentication.Sample\WeChatAuthentication.Sample.csproj", "{5995174C-5588-4C74-80DB-935FEDF4AABD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeChatAuthentication.Sample", "WeChatAuthentication.Sample\WeChatAuthentication.Sample.csproj", "{5995174C-5588-4C74-80DB-935FEDF4AABD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B6D0250-6396-4E5F-AADA-8E7C0C8D03D3}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

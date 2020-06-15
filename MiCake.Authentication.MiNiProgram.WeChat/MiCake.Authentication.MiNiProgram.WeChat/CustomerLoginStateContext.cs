@@ -16,13 +16,15 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             string sessionKey,
             string uniodId,
             string errCode,
-            string errMsg) : base(context, scheme, options)
+            string errMsg,
+            string sessionInfoKey = null) : base(context, scheme, options)
         {
             OpenId = openId;
             SessionKey = sessionKey;
             UnionId = uniodId;
             ErrCode = errCode;
             ErrMsg = errMsg;
+            SessionInfoKey = sessionInfoKey;
         }
 
         /// <summary>
@@ -51,5 +53,11 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// 错误信息
         /// </summary>
         public string ErrMsg { get; set; }
+
+        /// <summary>
+        /// 微信服务端返回的密匙保存在缓存中所关联的Key。
+        /// 该值需要SaveSessionKeyToCache配置为true时才有实际意义。
+        /// </summary>
+        public string SessionInfoKey { get; set; }
     }
 }

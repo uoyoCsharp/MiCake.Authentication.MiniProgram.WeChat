@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Threading.Tasks;
 
@@ -12,13 +13,13 @@ namespace MiCake.Authentication.MiniProgram.WeChat
     {
         /// <summary>
         /// 小程序 appId
-        /// 【请注意该信息的安全性,不要下发至客户端】
+        /// 【请注意该信息的安全性,避免下发至客户端】
         /// </summary>
         public string WeChatAppId { get; set; }
 
         /// <summary>
         /// 小程序 appSecret
-        /// 【请注意该信息的安全性,不要下发至客户端】
+        /// 【请注意该信息的安全性,避免下发至客户端】
         /// </summary>
         public string WeChatSecret { get; set; }
 
@@ -43,6 +44,23 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作。
         /// </summary>
         public Func<CustomerLoginStateContext, Task> CustomerLoginState { get; set; }
+
+        /// <summary>
+        /// 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。
+        /// 
+        /// <para>
+        /// 当该值为true时，验证时从DI容器中获取<see cref="IWeChatSessionInfoStore"/>服务来进行保存。
+        /// 默认的保存方案为：<see cref="DefaultSessionInfoStore"/>。
+        /// 该方案使用了<see cref="IDistributedCache"/>来作为缓存，所以请在使用时确保已经添加了IDistributedCache的实现方案。
+        /// </para>
+        /// </summary>
+        public bool SaveSessionKeyToCache { get; set; }
+
+        /// <summary>
+        /// 缓存过期的时间。
+        /// 默认值为：1天。
+        /// </summary>
+        public TimeSpan CacheSlidingExpiration { get; set; } = TimeSpan.FromDays(1);
 
         /// <summary>
         /// Gets or sets the <see cref="WeChatEvents"/> used to handle authentication events.

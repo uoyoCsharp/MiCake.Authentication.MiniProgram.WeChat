@@ -29,6 +29,8 @@ namespace WeChatAuthentication.Sample
             services.AddSingleton<IUserManager, UserManager>();
             services.AddScoped<AssociateWeChatUser>();
 
+            services.AddDistributedMemoryCache();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -39,8 +41,8 @@ namespace WeChatAuthentication.Sample
                 {
                     options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
-
-                    options.CustomerLoginState += CreateToken;   //添加颁发JwtToken的步骤
+                    options.SaveSessionKeyToCache = true;
+                    options.CustomerLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
                 });
         }
 
@@ -77,6 +79,14 @@ namespace WeChatAuthentication.Sample
             var jwtToken = associateUserService.GetUserToken(context.OpenId);
             var response = context.HttpContext.Response;
             await response.WriteAsync(jwtToken);
+        }
+
+        public Task RedirectToGiveToken(CustomerLoginStateContext context)
+        {
+            var currentUrl = $"Login/CreateToken?key={context.SessionInfoKey}";
+            context.HttpContext.Response.Redirect(currentUrl);
+
+            return Task.CompletedTask;
         }
     }
 }
