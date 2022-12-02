@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Threading.Tasks;
 
@@ -15,13 +14,13 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// 小程序 appId
         /// 【请注意该信息的安全性,避免下发至客户端】
         /// </summary>
-        public string WeChatAppId { get; set; }
+        public string WeChatAppId { get; set; } = string.Empty;
 
         /// <summary>
         /// 小程序 appSecret
         /// 【请注意该信息的安全性,避免下发至客户端】
         /// </summary>
-        public string WeChatSecret { get; set; }
+        public string WeChatSecret { get; set; } = string.Empty;
 
         /// <summary>
         /// 授权类型，该值为:authorization_code.
@@ -43,24 +42,27 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// 根据微信服务器返回的会话密匙进行执行自定义登录态操作。
         /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作。
         /// </summary>
-        public Func<CustomerLoginStateContext, Task> CustomerLoginState { get; set; }
+        public Func<CustomerLoginStateContext, Task>? CustomerLoginState { get; set; }
 
         /// <summary>
         /// 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。
         /// 
         /// <para>
-        /// 当该值为true时，验证时从DI容器中获取<see cref="IWeChatSessionInfoStore"/>服务来进行保存。
-        /// 默认的保存方案为：<see cref="DefaultSessionInfoStore"/>。
-        /// 该方案使用了<see cref="IDistributedCache"/>来作为缓存，所以请在使用时确保已经添加了IDistributedCache的实现方案。
+        /// 当该值为true时，从DI容器中获取<see cref="IWeChatSessionInfoStore"/>服务来将微信服务端返回的结果保存到缓存中。
+        /// 默认的保存方案为：<see cref="DefaultSessionInfoStore"/>，该方案使用在内存中保存数据。
         /// </para>
         /// </summary>
-        public bool SaveSessionKeyToCache { get; set; }
+        public bool SaveSessionToCache { get; set; }
 
         /// <summary>
         /// 缓存过期的时间。
-        /// 默认值为：1天。
+        /// 默认值为：1分钟。
+        /// 
+        /// <para>
+        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义。
+        /// </para>
         /// </summary>
-        public TimeSpan CacheSlidingExpiration { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan CacheExpiration { get; set; } = TimeSpan.FromMinutes(1);
 
         /// <summary>
         /// Gets or sets the <see cref="WeChatEvents"/> used to handle authentication events.

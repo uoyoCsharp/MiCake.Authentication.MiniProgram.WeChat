@@ -17,7 +17,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             string uniodId,
             string errCode,
             string errMsg,
-            string sessionInfoKey = null) : base(context, scheme, options)
+            string? sessionInfoKey = null) : base(context, scheme, options)
         {
             OpenId = openId;
             SessionKey = sessionKey;
@@ -56,8 +56,8 @@ namespace MiCake.Authentication.MiniProgram.WeChat
 
         /// <summary>
         /// 微信服务端返回的密匙保存在缓存中所关联的Key。
-        /// 该值需要SaveSessionKeyToCache配置为true时才有实际意义。
+        /// 该值需要<see cref="WeChatMiniProgramOptions.SaveSessionToCache"/>配置为true时才有实际意义。
         /// </summary>
-        public string SessionInfoKey { get; set; }
+        public string? SessionInfoKey { get; set; }
     }
 }

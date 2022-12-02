@@ -1,34 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Description>AspNet Core的微信小程序登录验证支持包。</Description>
-    <AssemblyName>MiCake.Authentication.MiniProgram.WeChat</AssemblyName>
-    <Product>MiCake</Product>
-    <Authors>uoyoCsharp</Authors>
-    <owners>uoyoCsharp</owners>
-    <Version>1.0.1</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageProjectUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>WeChat;MiniProgram;AspNetCore;MiCake;Authentication</PackageTags>
-    <PackageOutputPath>$(MSBuildThisFileDirectory)src\nuget</PackageOutputPath>
-    <PackageIcon>nuget_logo.png</PackageIcon>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<Description>AspNet Core的微信小程序登录验证支持包。</Description>
+		<AssemblyName>MiCake.Authentication.MiniProgram.WeChat</AssemblyName>
+		<Product>MiCake</Product>
+		<Authors>uoyoCsharp</Authors>
+		<owners>uoyoCsharp</owners>
+		<Version>1.0.1</Version>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageProjectUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>WeChat;MiniProgram;AspNetCore;MiCake;Authentication</PackageTags>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)src\nuget</PackageOutputPath>
+		<PackageIcon>nuget_logo.png</PackageIcon>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)assets\nuget_logo.png" Pack="true" Visible="false" PackagePath="\" />
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="$(MSBuildThisFileDirectory)assets\nuget_logo.png" Pack="true" Visible="false" PackagePath="\" />
+		<None Include="..\.editorconfig" Link=".editorconfig" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.5" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
+	</ItemGroup>
 
 </Project>

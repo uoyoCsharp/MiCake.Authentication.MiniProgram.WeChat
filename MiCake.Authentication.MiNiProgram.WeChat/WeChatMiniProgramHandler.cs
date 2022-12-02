@@ -27,12 +27,12 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             var query = Request.Query;
             var jsCode = query[Options.WeChatJsCodeQueryString];
 
-            if (string.IsNullOrEmpty(jsCode))
+            if (string.IsNullOrWhiteSpace(jsCode))
             {
                 return HandleRequestResult.Fail("没有找到客户端所提供的JsCode供微信服务器进行验证。");
             }
 
-            using var tokens = await ExchangeCodeAsync(jsCode);
+            using var tokens = await ExchangeCodeAsync(jsCode!);
 
             if (tokens.Error != null)
             {
@@ -53,13 +53,13 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             }
             else
             {
-                string sessionInfoKey = null;
+                string? sessionInfoKey = null;
 
-                if (Options.SaveSessionKeyToCache)
+                if (Options.SaveSessionToCache)
                 {
                     var sessionStore = Context.RequestServices.GetService<IWeChatSessionInfoStore>();
                     if (sessionStore != null)
-                        sessionInfoKey = await sessionStore.StoreAsync(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
+                        sessionInfoKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
                 }
 
                 var exceptions = new List<Exception>();

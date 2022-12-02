@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
@@ -12,27 +13,29 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// </summary>
         /// <param name="sessionInfo"><see cref="WeChatSessionInfo"/></param>
         /// <param name="currentOption">当前的微信验证配置信息</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>与该seesionInfo所关联的Key信息</returns>
-        Task<string> StoreAsync(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption);
-
-        /// <summary>
-        /// 刷新当前Key的所对应的信息。
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="sessionInfo"><see cref="WeChatSessionInfo"/></param>
-        /// <param name="currentOption">当前的微信验证配置信息</param>
-        Task RenewAsync(string key, WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption);
+        Task<string> Store(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 根据Key来移除缓存中的结果。
         /// </summary>
         /// <param name="key"></param>
-        Task RemoveAsync(string key);
+        Task Remove(string key);
 
         /// <summary>
         /// 根据Key来获取对应的<see cref="WeChatSessionInfo"/>。
         /// </summary>
         /// <param name="key"></param>
-        Task<WeChatSessionInfo> GetSessionInfo(string key);
+        /// <param name="cancellationToken"></param>
+        Task<WeChatSessionInfo?> GetSession(string key, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 根据Key来获取对应的<see cref="WeChatSessionInfo"/>，并且在之后移除该缓存。
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<WeChatSessionInfo?> GetAndRemoveSession(string key, CancellationToken cancellationToken = default);
     }
 }

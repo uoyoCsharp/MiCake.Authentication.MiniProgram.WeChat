@@ -1,58 +1,67 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
     public class DefaultSessionInfoStore : IWeChatSessionInfoStore
     {
-        private readonly IDistributedCache _distributedCache;
-        private const string keyPrefix = "wechat-";
+        private readonly MemoryCache _memCache;
+        private const string keyPrefix = "mc-auth-wechat-";
 
-        public DefaultSessionInfoStore(IDistributedCache distributedCache)
+        public DefaultSessionInfoStore(ILoggerFactory loggerFactory)
         {
-            _distributedCache = distributedCache;
+            // create default memory cache.
+            _memCache = new MemoryCache(Options.Create(new MemoryDistributedCacheOptions()), loggerFactory);
         }
 
-        public async Task RemoveAsync(string key)
-        {
-            await _distributedCache.RemoveAsync(key);
-        }
-
-        public async Task RenewAsync(string key, WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption)
-        {
-            await _distributedCache.RemoveAsync(key);
-
-            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
-            options.SetSlidingExpiration(currentOption.CacheSlidingExpiration);
-            await _distributedCache.SetAsync(key, CreateSesionBytes(sessionInfo), options);
-        }
-
-        public async Task<string> StoreAsync(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption)
+        public Task<string> Store(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption, CancellationToken cancellationToken = default)
         {
             var key = keyPrefix + Guid.NewGuid().ToString();
 
-            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
-            options.SetSlidingExpiration(currentOption.CacheSlidingExpiration);
+            var memoryCacheEntryOptions = new MemoryCacheEntryOptions();
+            memoryCacheEntryOptions.AbsoluteExpirationRelativeToNow = currentOption.CacheExpiration;
 
-            await _distributedCache.SetAsync(key, CreateSesionBytes(sessionInfo), options);
+            _memCache.Set(key, sessionInfo, memoryCacheEntryOptions);
 
-            return key;
+            return Task.FromResult(key);
         }
 
-        public async Task<WeChatSessionInfo> GetSessionInfo(string key)
+        public Task Remove(string key)
         {
-            var value = await _distributedCache.GetAsync(key);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
-            if (value == null)
-                return null;
+            _memCache.Remove(key);
 
-            return JsonSerializer.Deserialize<WeChatSessionInfo>(value);
+            return Task.CompletedTask;
         }
 
-        private byte[] CreateSesionBytes(WeChatSessionInfo sessionInfo)
-            => JsonSerializer.SerializeToUtf8Bytes(sessionInfo, typeof(WeChatSessionInfo));
+        public Task<WeChatSessionInfo?> GetSession(string key, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
+            var value = _memCache.Get<WeChatSessionInfo>(key);
+
+            return Task.FromResult(value);
+        }
+
+        public Task<WeChatSessionInfo?> GetAndRemoveSession(string key, CancellationToken cancellationToken = default)
+        {
+            var data = GetSession(key, cancellationToken);
+
+            _memCache.Remove(key);
+
+            return data;
+        }
     }
 }
