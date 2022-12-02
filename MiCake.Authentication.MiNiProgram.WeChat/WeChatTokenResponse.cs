@@ -12,31 +12,31 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// <summary>
         /// 用户唯一标识
         /// </summary>
-        public string OpenId { get; set; }
+        public string? OpenId { get; set; }
 
         /// <summary>
         /// 会话密钥
         /// </summary>
-        public string SessionKey { get; set; }
+        public string? SessionKey { get; set; }
 
         /// <summary>
         /// 用户在开放平台的唯一标识符，在满足 UnionID 下发条件的情况下会返回
         /// </summary>
-        public string UnionId { get; set; }
+        public string? UnionId { get; set; }
 
         /// <summary>
         /// 错误码
         /// </summary>
-        public string ErrCode { get; set; }
+        public string? ErrCode { get; set; }
 
         /// <summary>
         /// 错误信息
         /// </summary>
-        public string ErrMsg { get; set; }
+        public string? ErrMsg { get; set; }
 
-        public Exception Error { get; set; }
+        public Exception? Error { get; set; }
 
-        public JsonDocument Response { get; set; }
+        public JsonDocument? Response { get; set; }
 
         private WeChatTokenResponse(JsonDocument response)
         {
@@ -72,7 +72,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
 
     public static class JsonDocumentAuthExtensions
     {
-        public static string GetString(this JsonElement element, string key)
+        public static string? GetString(this JsonElement element, string key)
         {
             if (element.TryGetProperty(key, out var property) && property.ValueKind != JsonValueKind.Null)
             {

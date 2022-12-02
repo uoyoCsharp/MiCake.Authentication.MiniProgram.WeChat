@@ -42,7 +42,8 @@ namespace WeChatAuthentication.Sample
                     options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
                     options.SaveSessionToCache = true;
-                    options.CustomerLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
+                    options.CustomLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
+                    options.CacheExpiration = TimeSpan.FromSeconds(10);
                 });
         }
 
@@ -67,7 +68,7 @@ namespace WeChatAuthentication.Sample
             });
         }
 
-        public async Task CreateToken(CustomerLoginStateContext context)
+        public async Task CreateToken(CustomLoginStateContext context)
         {
             var associateUserService = context.HttpContext.RequestServices.GetService<AssociateWeChatUser>();
 
@@ -81,7 +82,7 @@ namespace WeChatAuthentication.Sample
             await response.WriteAsync(jwtToken);
         }
 
-        public Task RedirectToGiveToken(CustomerLoginStateContext context)
+        public Task RedirectToGiveToken(CustomLoginStateContext context)
         {
             var currentUrl = $"Login/CreateToken?key={context.SessionInfoKey}";
             context.HttpContext.Response.Redirect(currentUrl);

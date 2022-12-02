@@ -16,14 +16,14 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         public DefaultSessionInfoStore(ILoggerFactory loggerFactory)
         {
             // create default memory cache.
-            _memCache = new MemoryCache(Options.Create(new MemoryDistributedCacheOptions()), loggerFactory);
+            _memCache = new MemoryCache(Options.Create(new MemoryDistributedCacheOptions() { SizeLimit = null }), loggerFactory);
         }
 
         public Task<string> Store(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption, CancellationToken cancellationToken = default)
         {
             var key = keyPrefix + Guid.NewGuid().ToString();
 
-            var memoryCacheEntryOptions = new MemoryCacheEntryOptions();
+            MemoryCacheEntryOptions memoryCacheEntryOptions = new();
             memoryCacheEntryOptions.AbsoluteExpirationRelativeToNow = currentOption.CacheExpiration;
 
             _memCache.Set(key, sessionInfo, memoryCacheEntryOptions);

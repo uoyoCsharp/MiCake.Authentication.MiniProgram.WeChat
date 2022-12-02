@@ -17,10 +17,6 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         /// </summary>
         public string SessionKey { get; set; }
 
-        public WeChatSessionInfo()
-        {
-        }
-
         public WeChatSessionInfo(string openId, string sessionKey)
         {
             if (string.IsNullOrWhiteSpace(openId))

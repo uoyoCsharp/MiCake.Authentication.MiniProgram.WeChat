@@ -9,10 +9,10 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class WeChatMiniProgramExtensions
     {
         public static AuthenticationBuilder AddWeChatMiniProgram(this AuthenticationBuilder builder, Action<WeChatMiniProgramOptions> configureOptions)
-            => builder.AddWeChatMiniProgram(WeChatMiniProgramDefault.AuthenticationScheme, configureOptions);
+            => builder.AddWeChatMiniProgram(WeChatMiniProgramAuthConstants.AuthenticationScheme, configureOptions);
 
         public static AuthenticationBuilder AddWeChatMiniProgram(this AuthenticationBuilder builder, string authenticationScheme, Action<WeChatMiniProgramOptions> configureOptions)
-            => builder.AddWeChatMiniProgram(authenticationScheme, WeChatMiniProgramDefault.DisplayName, configureOptions);
+            => builder.AddWeChatMiniProgram(authenticationScheme, WeChatMiniProgramAuthConstants.DisplayName, configureOptions);
 
         public static AuthenticationBuilder AddWeChatMiniProgram(this AuthenticationBuilder builder, string authenticationScheme, string displayName, Action<WeChatMiniProgramOptions> configureOptions)
         {

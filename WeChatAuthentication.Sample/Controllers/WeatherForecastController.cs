@@ -8,7 +8,7 @@ using System.Linq;
 namespace WeChatAuthentication.Sample.Controllers
 {
     [ApiController]
-    [Route("[controller]/[action]")]
+    [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -23,7 +23,7 @@ namespace WeChatAuthentication.Sample.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet()]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
@@ -36,7 +36,7 @@ namespace WeChatAuthentication.Sample.Controllers
             .ToArray();
         }
 
-        [HttpGet]
+        [HttpGet("auth")]
         [Authorize]
         public IEnumerable<WeatherForecast> GetWithAuthorize()
         {

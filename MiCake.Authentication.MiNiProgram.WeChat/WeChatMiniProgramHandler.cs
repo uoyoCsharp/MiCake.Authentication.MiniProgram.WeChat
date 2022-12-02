@@ -40,14 +40,18 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             }
 
             var completedContext = new WeChatServerCompletedContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg);
-            await Options.Events?.OnWeChatServerCompleted(completedContext);
+            var completedTask = Options.Events?.OnWeChatServerCompleted?.Invoke(completedContext);
+            if (completedTask is not null) { await completedTask; }
 
             if (string.IsNullOrEmpty(tokens.OpenId) || string.IsNullOrEmpty(tokens.SessionKey))
             {
-                return HandleRequestResult.Fail("没有接收到微信服务器所返回的OpenID和SessionKey。");
+                var failMsg = "没有接收到微信服务器所返回的OpenID和SessionKey。";
+                failMsg += string.IsNullOrWhiteSpace(tokens.ErrMsg) ? "" : $"微信服务端错误信息：{tokens.ErrMsg}";
+
+                return HandleRequestResult.Fail(failMsg);
             }
 
-            if (Options.CustomerLoginState == null)
+            if (Options.CustomLoginState == null)
             {
                 Logger.LogWarning("当前没有提供微信小程序自定义登录态的逻辑。");
             }
@@ -65,8 +69,9 @@ namespace MiCake.Authentication.MiniProgram.WeChat
                 var exceptions = new List<Exception>();
                 try
                 {
-                    var customerLoginStateContext = new CustomerLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionInfoKey);
-                    await Options.CustomerLoginState?.Invoke(customerLoginStateContext);
+                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionInfoKey);
+                    var customStateAction = Options.CustomLoginState?.Invoke(customLoginStateContext);
+                    if (customStateAction is not null) { await customStateAction; }
                 }
                 catch (Exception ex)
                 {
@@ -86,14 +91,14 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         {
             var queryStringBuilder = new StringBuilder("?");
             queryStringBuilder.Append("appid=" + Options.WeChatAppId);
-            queryStringBuilder.Append("&");
+            queryStringBuilder.Append('&');
             queryStringBuilder.Append("secret=" + Options.WeChatSecret);
-            queryStringBuilder.Append("&");
+            queryStringBuilder.Append('&');
             queryStringBuilder.Append("js_code=" + clientJsCode);
-            queryStringBuilder.Append("&");
+            queryStringBuilder.Append('&');
             queryStringBuilder.Append("grant_type=" + Options.WeChatGrantTtype);
 
-            var requestURL = WeChatMiniProgramDefault.AuthorizationEndpoint + queryStringBuilder.ToString();
+            var requestURL = WeChatMiniProgramAuthConstants.AuthorizationEndpoint + queryStringBuilder.ToString();
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestURL);
             var response = await Options.Backchannel.SendAsync(requestMessage, Context.RequestAborted);
