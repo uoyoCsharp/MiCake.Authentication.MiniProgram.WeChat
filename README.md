@@ -12,7 +12,7 @@
 
 ### 🍓 所需环境版本
 
-+ `AspNet Core` 3.0及以上版本
++ `AspNet Core` 7.0及以上版本
 
 ### 🍑 安装包
 
@@ -43,11 +43,11 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 | WeChatSecret     | 小程序 appSecret key。从微信开放平台申请。   |
 | WeChatGrantTtype   | 授权类型，该值为:authorization_code。无须更改。   |
 | WeChatJsCodeQueryString   | 登录url中,携带小程序客户端获取到code的参数名。默认为:"code"。   |
-| CustomerLoginState   | 根据微信服务器返回的会话密匙进行执行自定义登录态操作。   |
-| SaveSessionKeyToCache   | 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。   |
-| CacheSlidingExpiration   | 缓存过期的时间。【默认值为：1天】   |
+| CustomLoginState   | 根据微信服务器返回的会话密匙进行执行自定义登录态操作。   |
+| SaveSessionToCache   | 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。   |
+| CacheExpiration   | 缓存过期的时间。【默认值为：1分钟】   |
 
-**需要特别说明的是`WeChatJsCodeQueryString`和`CustomerLoginState`。**
+**需要特别说明的是`WeChatJsCodeQueryString`和`CustomLoginState`。**
 
 `WeChatJsCodeQueryString`一般与Options中的`CallbackPath`参数搭配使用，两个值指定了需要用户访问验证接口的URL地址：
 
@@ -57,7 +57,7 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 默认情况下，验证登陆地址就是`“/signin-wechat?code=”`。开放该配置的缘由是为了避免和您现有的api冲突，当有冲突时，您可以通过更改这两个参数解决。
 
-`CustomerLoginState`是一个`Func`类型，它返回了微信服务器所返回的`openid`和`session_key`信息（假如您开启了`SaveSessionKeyToCache`配置，那么该模型中的`SessionInfoKey`属性将包含缓存的Key值，可以通过使用该Key来获取到保存的OpenId等信息）。您可以通过建立自有逻辑对登陆进行处理，比如根据`openid`颁发`JWT TOKEN`等操作。
+`CustomLoginState`是一个`Func`类型，它返回了微信服务器所返回的`openid`和`session_key`信息（假如您开启了`SaveSessionToCache`配置，那么该模型中的`SessionInfoKey`属性将包含缓存的Key值，可以通过使用该Key来获取到保存的OpenId等信息）。您可以通过建立自有逻辑对登陆进行处理，比如根据`openid`颁发`JWT TOKEN`等操作。
 
 就像下方的代码一样（该代码可以在仓库中的Sample中看到）：
 
@@ -73,10 +73,10 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
             options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
 
-            options.CustomerLoginState += CreateToken;   //添加颁发JwtToken的步骤
+            options.CustomLoginState += CreateToken;   //添加颁发JwtToken的步骤
         });
 
-public async Task CreateToken(CustomerLoginStateContext context)
+public async Task CreateToken(CustomLoginStateContext context)
 {
     var associateUserService = context.HttpContext.RequestServices.GetService<AssociateWeChatUser>();
 
@@ -95,27 +95,26 @@ public async Task CreateToken(CustomerLoginStateContext context)
 
 #### 🍆 缓存OpenId和SessionKey
 
-在某些时候，您可能需要将微信所返回的密匙信息（OpenId和SessionKey）保存在缓存中。那么您可以将配置项中的`SaveSessionKeyToCache`设置为`true`。
+在某些时候，您可能需要将微信所返回的密匙信息（OpenId和SessionKey）保存在缓存中。那么您可以将配置项中的`SaveSessionToCache`设置为`true`。
 
 此时您可以提供一个`IWeChatSessionInfoStore`的具体实现，并且将它注入到依赖注入容器中。在获取微信小程序所返回的密匙之后，就会自动保存到您所自定义的缓存中。
 
-假如您没有指定`IWeChatSessionInfoStore`的服务，那么将使用默认的缓存实现方案：`DefaultSessionInfoStore`。该方案是通过`IDistributedCache`来实现的缓存机制，所以在使用时，请确保您已经添加了`IDistributedCache`的缓存实现方案，比如`DistributedMemoryCache`。
+假如您没有指定`IWeChatSessionInfoStore`的服务，那么将使用默认的缓存实现方案：`DefaultSessionInfoStore`，该方案将数据保存在内存中，具体实现为`IDistributeCache`的`MemoryCache`。
 
 下方的代码使用了缓存的方案来进行微信小程序登录验证:
 
 ```csharp
-services.AddDistributedMemoryCache();   //使用DistributedMemoryCache
 
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddWeChatMiniProgram(options =>
         {
             options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
             options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
-            options.SaveSessionKeyToCache = true;
-            options.CustomerLoginState += RedirectToGiveToken;   //添加通过重定向的方案来进行颁发Jwt Token
+            options.SaveSessionToCache = true;
+            options.CustomLoginState += RedirectToGiveToken;   //添加通过重定向的方案来进行颁发Jwt Token
         });
 
-public Task RedirectToGiveToken(CustomerLoginStateContext context)
+public Task RedirectToGiveToken(CustomLoginStateContext context)
 {
     var currentUrl = $"Login/CreateToken?key={context.SessionInfoKey}";
     context.HttpContext.Response.Redirect(currentUrl);
@@ -158,13 +157,13 @@ public class LoginController : ControllerBase
 
 ### 🍅 一些小问题
 
-+ **如何在`CustomerLoginState`里面获取到依赖注入的服务实例？**
++ **如何在`CustomLoginState`里面获取到依赖注入的服务实例？**
   
-  **answer** :`CustomerLoginStateContext`里面包含了`HttpContext`，您可以根据`HttpContext.RequestServices`来进行获取。该`ServiceProvider`的范围和`Controller`的范围是一样的。
+  **answer** :`CustomLoginStateContext`里面包含了`HttpContext`，您可以根据`HttpContext.RequestServices`来进行获取。该`ServiceProvider`的范围和`Controller`的范围是一样的。
 
 + **如果微信服务器验证失败会怎么样**
 
-  **answer** :当微信服务器验证失败的时候，`OpenId`等信息将为空。所以无法进行后面的验证步骤，最后将返回验证失败的错误信息。如果您需要获取到微信服务器返回的错误信息，您可以使用`WeChatMiniProgramOptions.Events.OnWeChatServerCompleted`的`Func`委托注册。
+  **answer** :当微信服务器验证失败的时候，`OpenId`等信息将为空。所以无法进行后面的验证步骤，最后将返回验证失败的错误信息。如果您在错误时进行处理，您可以使用`WeChatMiniProgramOptions.Events.OnWeChatServerCompleted`的`Func`委托注册一些自定义操作。
 
   ```csharp
     .AddWeChatMiniProgram(options =>
