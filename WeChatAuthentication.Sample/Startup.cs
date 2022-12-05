@@ -43,7 +43,6 @@ namespace WeChatAuthentication.Sample
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
                     options.SaveSessionToCache = true;
                     options.CustomLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
-                    options.CacheExpiration = TimeSpan.FromSeconds(10);
                 });
         }
 

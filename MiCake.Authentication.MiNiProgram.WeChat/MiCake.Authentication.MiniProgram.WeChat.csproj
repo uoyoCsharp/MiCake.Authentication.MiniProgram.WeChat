@@ -7,20 +7,32 @@
 		<Product>MiCake</Product>
 		<Authors>uoyoCsharp</Authors>
 		<owners>uoyoCsharp</owners>
-		<Version>1.0.1</Version>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Version>1.0.2</Version>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat</RepositoryUrl>
+		<RepositoryUrl>https://github.com/uoyoCsharp/MiCake.Authentication.MiniProgram.WeChat.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageTags>WeChat;MiniProgram;AspNetCore;MiCake;Authentication</PackageTags>
 		<PackageOutputPath>$(MSBuildThisFileDirectory)src\nuget</PackageOutputPath>
 		<PackageIcon>nuget_logo.png</PackageIcon>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="$(MSBuildThisFileDirectory)assets\nuget_logo.png" Pack="true" Visible="false" PackagePath="\" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
 		<None Include="..\.editorconfig" Link=".editorconfig" />
 	</ItemGroup>
 
