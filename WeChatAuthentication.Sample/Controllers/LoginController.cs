@@ -28,10 +28,21 @@ namespace WeChatAuthentication.Sample.Controllers
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException($"key 不能为空");
 
-            var weChatSession = await _weChatSessionStore.GetAndRemoveSession(key);
+            var weChatSession = await _weChatSessionStore.GetSession(key);
             _logger.LogInformation(message: weChatSession?.OpenId);
 
             return _associateWeChatUser.GetUserToken(weChatSession.OpenId);
+        }
+
+        [HttpGet("openId")]
+        public async Task<string> GetOpenId(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException($"key 不能为空");
+
+            var weChatSession = await _weChatSessionStore.GetSession(key);
+
+            return weChatSession?.OpenId;
         }
     }
 }

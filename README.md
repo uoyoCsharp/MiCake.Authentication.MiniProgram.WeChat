@@ -45,7 +45,7 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 | WeChatJsCodeQueryString   | 登录url中,携带小程序客户端获取到code的参数名。默认为:"code"。   |
 | CustomLoginState   | 根据微信服务器返回的会话密匙进行执行自定义登录态操作。   |
 | SaveSessionToCache   | 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。   |
-| CacheExpiration   | 缓存过期的时间。【默认值为：1分钟】   |
+| CacheExpiration   | 缓存滑动过期的时间。【默认值为：30分钟】   |
 
 **需要特别说明的是`WeChatJsCodeQueryString`和`CustomLoginState`。**
 

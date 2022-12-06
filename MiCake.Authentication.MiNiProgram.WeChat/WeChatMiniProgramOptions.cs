@@ -55,14 +55,24 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         public bool SaveSessionToCache { get; set; }
 
         /// <summary>
-        /// 缓存过期的时间。
-        /// 默认值为：1分钟。
+        /// 缓存滑动过期的时间。
+        /// 默认值为：30分钟。
         /// 
         /// <para>
         ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义。
         /// </para>
         /// </summary>
-        public TimeSpan CacheExpiration { get; set; } = TimeSpan.FromMinutes(1);
+        public TimeSpan CacheSlidingExpiration { get; set; } = TimeSpan.FromMinutes(30);
+
+        /// <summary>
+        /// 缓存的key生成规则。
+        /// 
+        /// <para>
+        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义。
+        ///     若不指定，默认将采用 'prefix + guid' 的方式生成。
+        /// </para>
+        /// </summary>
+        public Func<string>? CacheKeyGenerationRule { get; set; };
 
         /// <summary>
         /// Gets or sets the <see cref="WeChatEvents"/> used to handle authentication events.

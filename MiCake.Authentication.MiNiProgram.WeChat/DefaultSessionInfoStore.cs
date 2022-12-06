@@ -11,7 +11,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
     public class DefaultSessionInfoStore : IWeChatSessionInfoStore
     {
         private readonly MemoryCache _memCache;
-        private const string keyPrefix = "mc-auth-wechat-";
+        private const string keyPrefix = "wechat-idkey-";
 
         public DefaultSessionInfoStore(ILoggerFactory loggerFactory)
         {
@@ -21,10 +21,12 @@ namespace MiCake.Authentication.MiniProgram.WeChat
 
         public Task<string> Store(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption, CancellationToken cancellationToken = default)
         {
-            var key = keyPrefix + Guid.NewGuid().ToString();
+            var key = GenerateCacheKey(currentOption);
 
-            MemoryCacheEntryOptions memoryCacheEntryOptions = new();
-            memoryCacheEntryOptions.AbsoluteExpirationRelativeToNow = currentOption.CacheExpiration;
+            MemoryCacheEntryOptions memoryCacheEntryOptions = new()
+            {
+                SlidingExpiration = currentOption.CacheSlidingExpiration
+            };
 
             _memCache.Set(key, sessionInfo, memoryCacheEntryOptions);
 
@@ -62,6 +64,16 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             _memCache.Remove(key);
 
             return data;
+        }
+
+        private static string GenerateCacheKey(WeChatMiniProgramOptions options)
+        {
+            if (options.CacheKeyGenerationRule is null)
+            {
+                return keyPrefix + Guid.NewGuid().ToString();
+            }
+
+            return options.CacheKeyGenerationRule.Invoke();
         }
     }
 }

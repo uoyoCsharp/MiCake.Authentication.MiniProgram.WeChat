@@ -57,19 +57,19 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             }
             else
             {
-                string? sessionInfoKey = null;
+                string? sessionCacheKey = null;
 
                 if (Options.SaveSessionToCache)
                 {
                     var sessionStore = Context.RequestServices.GetService<IWeChatSessionInfoStore>();
                     if (sessionStore != null)
-                        sessionInfoKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
+                        sessionCacheKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
                 }
 
                 var exceptions = new List<Exception>();
                 try
                 {
-                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionInfoKey);
+                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionCacheKey);
                     var customStateAction = Options.CustomLoginState?.Invoke(customLoginStateContext);
                     if (customStateAction is not null) { await customStateAction; }
                 }
