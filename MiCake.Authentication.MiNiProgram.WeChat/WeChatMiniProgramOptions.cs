@@ -39,40 +39,43 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         public string WeChatJsCodeQueryString { get; set; } = "code";
 
         /// <summary>
-        /// 根据微信服务器返回的会话密匙进行执行自定义登录态操作。
-        /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作。
+        /// 根据微信服务器返回的会话密匙进行执行自定义登录态操作.
+        /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作.
         /// </summary>
         public Func<CustomLoginStateContext, Task>? CustomLoginState { get; set; }
 
         /// <summary>
-        /// 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。
+        /// 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中.
         /// 
         /// <para>
-        /// 当该值为true时，从DI容器中获取<see cref="IWeChatSessionInfoStore"/>服务来将微信服务端返回的结果保存到缓存中。
-        /// 默认的保存方案为：<see cref="DefaultSessionInfoStore"/>，该方案使用在内存中保存数据。
+        /// 当该值为true时，从DI容器中获取<see cref="IWeChatSessionInfoStore"/>服务来将微信服务端返回的结果保存到缓存中.
+        /// 默认的保存将数据保存在内存之中。
+        /// <para>
+        ///     默认值： true
+        /// </para>
         /// </para>
         /// </summary>
-        public bool SaveSessionToCache { get; set; }
+        public bool SaveSessionToCache { get; set; } = true;
 
         /// <summary>
-        /// 缓存滑动过期的时间。
-        /// 默认值为：30分钟。
+        /// 缓存滑动过期的时间.
+        /// 默认值为：30分钟.
         /// 
         /// <para>
-        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义。
+        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义.
         /// </para>
         /// </summary>
         public TimeSpan CacheSlidingExpiration { get; set; } = TimeSpan.FromMinutes(30);
 
         /// <summary>
-        /// 缓存的key生成规则。
+        /// 缓存的key生成规则.
         /// 
         /// <para>
-        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义。
-        ///     若不指定，默认将采用 'prefix + guid' 的方式生成。
+        ///     该值只有当 <see cref="SaveSessionToCache"/> = true的时候才有意义.
+        ///     若不指定，默认将采用 'prefix + guid' 的方式生成.
         /// </para>
         /// </summary>
-        public Func<string>? CacheKeyGenerationRule { get; set; };
+        public Func<WeChatSessionInfo, string>? CacheKeyGenerationRule { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="WeChatEvents"/> used to handle authentication events.

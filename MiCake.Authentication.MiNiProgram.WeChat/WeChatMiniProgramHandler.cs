@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -39,7 +38,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
                 return HandleRequestResult.Fail(tokens.Error);
             }
 
-            var completedContext = new WeChatServerCompletedContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg);
+            var completedContext = new WeChatServerCompletedContext(Context, Scheme, Options, tokens);
             var completedTask = Options.Events?.OnWeChatServerCompleted?.Invoke(completedContext);
             if (completedTask is not null) { await completedTask; }
 
@@ -66,25 +65,19 @@ namespace MiCake.Authentication.MiniProgram.WeChat
                         sessionCacheKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
                 }
 
-                var exceptions = new List<Exception>();
                 try
                 {
-                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens.OpenId, tokens.SessionKey, tokens.UnionId, tokens.ErrCode, tokens.ErrMsg, sessionCacheKey);
+                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens, sessionCacheKey);
                     var customStateAction = Options.CustomLoginState?.Invoke(customLoginStateContext);
                     if (customStateAction is not null) { await customStateAction; }
                 }
                 catch (Exception ex)
                 {
-                    exceptions.Add(ex);
-                }
-
-                if (exceptions.Count > 0)
-                {
-                    return HandleRequestResult.Fail(new AggregateException(exceptions));
+                    return HandleRequestResult.Fail(ex);
                 }
             }
 
-            return HandleRequestResult.Handle(); ;
+            return HandleRequestResult.Handle();
         }
 
         protected virtual async Task<WeChatTokenResponse> ExchangeCodeAsync(string clientJsCode)

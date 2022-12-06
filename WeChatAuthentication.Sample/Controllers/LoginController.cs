@@ -8,7 +8,7 @@ using WeChatAuthentication.Sample.Services;
 namespace WeChatAuthentication.Sample.Controllers
 {
     [ApiController]
-    [Route("[controller]/[action]")]
+    [Route("[controller]")]
     public class LoginController : ControllerBase
     {
         private readonly IWeChatSessionInfoStore _weChatSessionStore;
@@ -22,7 +22,7 @@ namespace WeChatAuthentication.Sample.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("token")]
         public async Task<string> CreateToken(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -42,7 +42,7 @@ namespace WeChatAuthentication.Sample.Controllers
 
             var weChatSession = await _weChatSessionStore.GetSession(key);
 
-            return weChatSession?.OpenId;
+            return weChatSession?.SessionKey;
         }
     }
 }

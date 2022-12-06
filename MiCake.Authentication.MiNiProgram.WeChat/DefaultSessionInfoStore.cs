@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MiCake.Authentication.MiniProgram.WeChat
 {
-    public class DefaultSessionInfoStore : IWeChatSessionInfoStore
+    internal class DefaultSessionInfoStore : IWeChatSessionInfoStore
     {
         private readonly MemoryCache _memCache;
         private const string keyPrefix = "wechat-idkey-";
@@ -21,7 +21,7 @@ namespace MiCake.Authentication.MiniProgram.WeChat
 
         public Task<string> Store(WeChatSessionInfo sessionInfo, WeChatMiniProgramOptions currentOption, CancellationToken cancellationToken = default)
         {
-            var key = GenerateCacheKey(currentOption);
+            var key = GenerateCacheKey(currentOption, sessionInfo);
 
             MemoryCacheEntryOptions memoryCacheEntryOptions = new()
             {
@@ -66,14 +66,14 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             return data;
         }
 
-        private static string GenerateCacheKey(WeChatMiniProgramOptions options)
+        private static string GenerateCacheKey(WeChatMiniProgramOptions options, WeChatSessionInfo sessionInfo)
         {
             if (options.CacheKeyGenerationRule is null)
             {
                 return keyPrefix + Guid.NewGuid().ToString();
             }
 
-            return options.CacheKeyGenerationRule.Invoke();
+            return options.CacheKeyGenerationRule.Invoke(sessionInfo);
         }
     }
 }

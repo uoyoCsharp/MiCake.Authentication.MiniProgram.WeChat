@@ -12,18 +12,14 @@ namespace MiCake.Authentication.MiniProgram.WeChat
             HttpContext context,
             AuthenticationScheme scheme,
             WeChatMiniProgramOptions options,
-            string? openId,
-            string? sessionKey,
-            string? uniodId,
-            string? errCode,
-            string? errMsg,
+            WeChatTokenResponse? wechatServerResponse,
             string? sessionCacheKey = null) : base(context, scheme, options)
         {
-            OpenId = openId;
-            SessionKey = sessionKey;
-            UnionId = uniodId;
-            ErrCode = errCode;
-            ErrMsg = errMsg;
+            OpenId = wechatServerResponse?.OpenId;
+            SessionKey = wechatServerResponse?.SessionKey;
+            UnionId = wechatServerResponse?.UnionId;
+            ErrCode = wechatServerResponse?.ErrCode;
+            ErrMsg = wechatServerResponse?.ErrMsg;
             SessionCacheKey = sessionCacheKey;
         }
 

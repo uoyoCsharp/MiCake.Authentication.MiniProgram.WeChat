@@ -1,4 +1,5 @@
 using MiCake.Authentication.MiniProgram.WeChat;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,8 +43,9 @@ namespace WeChatAuthentication.Sample
                     options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
                     options.SaveSessionToCache = true;
-                    options.CacheSlidingExpiration = TimeSpan.FromSeconds(10);
+                    options.CacheKeyGenerationRule = (s) => s.OpenId;
                     options.CustomLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
+                    options.Events.OnRemoteFailure += HandleFailure;  //添加错误处理，将异常信息包装为格式化的对象
                 });
         }
 
@@ -68,23 +70,18 @@ namespace WeChatAuthentication.Sample
             });
         }
 
-        public async Task CreateToken(CustomLoginStateContext context)
-        {
-            var associateUserService = context.HttpContext.RequestServices.GetService<AssociateWeChatUser>();
-
-            if (context.ErrCode != null && !context.ErrCode.Equals("0"))
-            {
-                throw new Exception(context.ErrMsg);
-            }
-
-            var jwtToken = associateUserService.GetUserToken(context.OpenId);
-            var response = context.HttpContext.Response;
-            await response.WriteAsync(jwtToken);
-        }
-
         public Task RedirectToGiveToken(CustomLoginStateContext context)
         {
-            context.HttpContext.Response.WriteAsync(context.SessionCacheKey);
+            context.HttpContext.Response.WriteAsJsonAsync(new { data = context.SessionCacheKey });
+            return Task.CompletedTask;
+        }
+
+        public Task HandleFailure(RemoteFailureContext context)
+        {
+            context.HttpContext.Response.StatusCode = 500;
+            context.HttpContext.Response.WriteAsJsonAsync(new { errorMsg = context.Failure.Message });
+
+            context.HandleResponse();   // 当Response已经Write了数据时，必须调用这句话
             return Task.CompletedTask;
         }
     }
