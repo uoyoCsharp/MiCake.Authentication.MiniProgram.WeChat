@@ -6,9 +6,9 @@ namespace MiCake.Authentication.MiniProgram.WeChat
     /// <summary>
     /// 用户进行自定义登录态操作时所需要的上下文信息
     /// </summary>
-    public class CustomLoginStateContext : ResultContext<WeChatMiniProgramOptions>
+    public class WeChatSessionObtainedContext : ResultContext<WeChatMiniProgramOptions>
     {
-        public CustomLoginStateContext(
+        public WeChatSessionObtainedContext(
             HttpContext context,
             AuthenticationScheme scheme,
             WeChatMiniProgramOptions options,

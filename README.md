@@ -20,6 +20,14 @@
 Install-Package MiCake.Authentication.MiniProgram.WeChat
 ```
 
+### 🍍 工作原理
+
+该扩展包主要帮助 `同微信服务器交换数据（openId & session_key)` 和 `将交换的数据保存到缓存中` 两个操作，方便用户能够直接通过 `小程序客户端调用login的code` 就获取到对应的数据。
+
+由于微信服务器所返回的`session_key`等数据为敏感数据，你不应该直接暴露给外界，所以你可以将缓存的key返回给外界。  
+
+外界通过传递缓存key到服务器，服务器再查找缓存来进行后续操作。
+
 ### 🍈使用
 
 ```csharp
@@ -43,9 +51,14 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 | WeChatSecret     | 小程序 appSecret key。从微信开放平台申请。   |
 | WeChatGrantTtype   | 授权类型，该值为:authorization_code。无须更改。   |
 | WeChatJsCodeQueryString   | 登录url中,携带小程序客户端获取到code的参数名。默认为:"code"。   |
-| CustomLoginState   | 根据微信服务器返回的会话密匙进行执行自定义登录态操作。   |
 | SaveSessionToCache   | 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中。   |
-| CacheExpiration   | 缓存滑动过期的时间。【默认值为：30分钟】   |
+| CacheSlidingExpiration   | 缓存滑动过期的时间。【默认值为：30分钟】   |
+| CacheKeyGenerationRule | 缓存的key生成规则。 |
+| Events   | 程序进行过程中注册的事件集。 你可以注册属于自己的事件来实现一些自定义逻辑。   |
+
+*对`Events`需要特别说明的是： 你可以特别关注其中的 `OnWeChatSessionObtained`、`OnRemoteFailure`和`OnWeChatServerCompleted`这三个事件。*
+
+*你可以查询下方的示例，来了解他们的用途。*
 
 **需要特别说明的是`WeChatJsCodeQueryString`和`CustomLoginState`。**
 
@@ -57,42 +70,6 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 默认情况下，验证登陆地址就是`“/signin-wechat?code=”`。开放该配置的缘由是为了避免和您现有的api冲突，当有冲突时，您可以通过更改这两个参数解决。
 
-`CustomLoginState`是一个`Func`类型，它返回了微信服务器所返回的`openid`和`session_key`信息（假如您开启了`SaveSessionToCache`配置，那么该模型中的`SessionInfoKey`属性将包含缓存的Key值，可以通过使用该Key来获取到保存的OpenId等信息）。您可以通过建立自有逻辑对登陆进行处理，比如根据`openid`颁发`JWT TOKEN`等操作。
-
-就像下方的代码一样（该代码可以在仓库中的Sample中看到）：
-
-```csharp
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.Audience = Configuration["JwtConfig:Audience"];
-            options.ClaimsIssuer = Configuration["JwtConfig:Issuer"];
-        })
-        .AddWeChatMiniProgram(options =>
-        {
-            options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
-            options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
-
-            options.CustomLoginState += CreateToken;   //添加颁发JwtToken的步骤
-        });
-
-public async Task CreateToken(CustomLoginStateContext context)
-{
-    var associateUserService = context.HttpContext.RequestServices.GetService<AssociateWeChatUser>();
-
-    if (context.ErrCode != null && !context.ErrCode.Equals("0"))
-    {
-        throw new Exception(context.ErrMsg);
-    }
-
-    var jwtToken = associateUserService.GetUserToken(context.OpenId);
-    var response = context.HttpContext.Response;
-    await response.WriteAsync(jwtToken);
-}
-```
-
-上方代码结合`JwtBearer`验证方案，在微信服务器返回成功后，根据`OpenID`信息查询到了本地数据库中的用户信息，并且为该用户创建了`Token`进行返回。
-
 #### 🍆 缓存OpenId和SessionKey
 
 在某些时候，您可能需要将微信所返回的密匙信息（OpenId和SessionKey）保存在缓存中。那么您可以将配置项中的`SaveSessionToCache`设置为`true`。
@@ -101,7 +78,7 @@ public async Task CreateToken(CustomLoginStateContext context)
 
 假如您没有指定`IWeChatSessionInfoStore`的服务，那么将使用默认的缓存实现方案：`DefaultSessionInfoStore`，该方案将数据保存在内存中，具体实现为`IDistributeCache`的`MemoryCache`。
 
-下方的代码使用了缓存的方案来进行微信小程序登录验证:
+#### 🍆 示例
 
 ```csharp
 
@@ -111,21 +88,30 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
             options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
             options.SaveSessionToCache = true;
-            options.CustomLoginState += RedirectToGiveToken;   //添加通过重定向的方案来进行颁发Jwt Token
+            options.Events.OnWeChatSessionObtained += RedirectToGiveToken;   //添加颁发JwtToken的步骤
+            options.Events.OnRemoteFailure += HandleFailure;  //添加错误处理，将异常信息包装为格式化的对象
         });
 
-public Task RedirectToGiveToken(CustomLoginStateContext context)
-{
-    var currentUrl = $"Login/CreateToken?key={context.SessionInfoKey}";
-    context.HttpContext.Response.Redirect(currentUrl);
+        public Task RedirectToGiveToken(WeChatSessionObtainedContext context)
+        {
+            // 将缓存的key返回给客户端 便于后期客户端传递回来进行操作
+            context.HttpContext.Response.WriteAsJsonAsync(new { data = context.SessionCacheKey });
+            return Task.CompletedTask;
+        }
 
-    return Task.CompletedTask;
-}
+        public Task HandleFailure(RemoteFailureContext context)
+        {
+            context.HttpContext.Response.StatusCode = 500;
+            context.HttpContext.Response.WriteAsJsonAsync(new { errorMsg = context.Failure.Message });
+
+            context.HandleResponse();   // 当Response已经Write了数据时，必须调用这句话
+            return Task.CompletedTask;
+        }
 ```
 
-当运行程序，访问 "https://your-host-address/signin-wechat?code=xxx" 时,将被重定向至 "https://your-host-address/Login/CreateToken?key=yourcachekey"。
+当运行程序，访问 "https://your-host-address/signin-wechat?code=xxx" 时,如果数据正确，将会得到一个对应的cacheKey值。
 
-而`Login/CreateToken`Action中根据所传入的cacheKey来得到微信的OpenId,然后执行颁发JWT Token的操作：
+在后期的逻辑中根据所传入的cacheKey来得到微信的OpenId,然后执行颁发JWT Token的操作：
 
 ```csharp
 [ApiController]
@@ -142,14 +128,14 @@ public class LoginController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<string> CreateToken(string key)
+    public async Task<string> CreateToken(string cacheKey)
     {
-        if (string.IsNullOrWhiteSpace(key))
+        if (string.IsNullOrWhiteSpace(cacheKey))
             throw new ArgumentException($"key 不能为空");
 
         //可以添加各种验证和操作逻辑
 
-        var weChatSession = await _weChatSessionStore.GetSessionInfo(key);
+        var weChatSession = await _weChatSessionStore.GetSessionInfo(cacheKey);
         return _associateWeChatUser.GetUserToken(weChatSession.OpenId);
     }
 }
@@ -160,20 +146,3 @@ public class LoginController : ControllerBase
 + **如何在`CustomLoginState`里面获取到依赖注入的服务实例？**
   
   **answer** :`CustomLoginStateContext`里面包含了`HttpContext`，您可以根据`HttpContext.RequestServices`来进行获取。该`ServiceProvider`的范围和`Controller`的范围是一样的。
-
-+ **如果微信服务器验证失败会怎么样**
-
-  **answer** :当微信服务器验证失败的时候，`OpenId`等信息将为空。所以无法进行后面的验证步骤，最后将返回验证失败的错误信息。如果您在错误时进行处理，您可以使用`WeChatMiniProgramOptions.Events.OnWeChatServerCompleted`的`Func`委托注册一些自定义操作。
-
-  ```csharp
-    .AddWeChatMiniProgram(options =>
-    {
-        options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
-        options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
-
-        options.Events.OnWeChatServerCompleted += async context =>
-        {
-            var msg = context.ErrMsg;  //此处将获取到错误信息。
-        };
-    }
-  ```

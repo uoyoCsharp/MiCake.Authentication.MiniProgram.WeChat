@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Threading.Tasks;
 using WeChatAuthentication.Sample.Services;
 
@@ -43,8 +42,7 @@ namespace WeChatAuthentication.Sample
                     options.WeChatAppId = Configuration["WeChatMiniProgram:appid"];
                     options.WeChatSecret = Configuration["WeChatMiniProgram:secret"];
                     options.SaveSessionToCache = true;
-                    options.CacheKeyGenerationRule = (s) => s.OpenId;
-                    options.CustomLoginState += RedirectToGiveToken;   //添加颁发JwtToken的步骤
+                    options.Events.OnWeChatSessionObtained += RedirectToGiveToken;   //添加颁发JwtToken的步骤
                     options.Events.OnRemoteFailure += HandleFailure;  //添加错误处理，将异常信息包装为格式化的对象
                 });
         }
@@ -70,7 +68,7 @@ namespace WeChatAuthentication.Sample
             });
         }
 
-        public Task RedirectToGiveToken(CustomLoginStateContext context)
+        public Task RedirectToGiveToken(WeChatSessionObtainedContext context)
         {
             context.HttpContext.Response.WriteAsJsonAsync(new { data = context.SessionCacheKey });
             return Task.CompletedTask;

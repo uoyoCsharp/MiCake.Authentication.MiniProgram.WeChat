@@ -50,31 +50,32 @@ namespace MiCake.Authentication.MiniProgram.WeChat
                 return HandleRequestResult.Fail(failMsg);
             }
 
-            if (Options.CustomLoginState == null)
+            var obtainedHanlder = Options.Events?.OnWeChatSessionObtained;
+            if (obtainedHanlder is null)
             {
-                Logger.LogWarning("当前没有提供微信小程序自定义登录态的逻辑。");
+                Logger.LogWarning("当前没有提供微信小程序登陆成功后的处理逻辑。");
             }
-            else
+
+            string? sessionCacheKey = null;
+
+            if (Options.SaveSessionToCache)
             {
-                string? sessionCacheKey = null;
+                var sessionStore = Context.RequestServices.GetService<IWeChatSessionInfoStore>();
+                if (sessionStore != null)
+                {
+                    sessionCacheKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
+                }
+            }
 
-                if (Options.SaveSessionToCache)
-                {
-                    var sessionStore = Context.RequestServices.GetService<IWeChatSessionInfoStore>();
-                    if (sessionStore != null)
-                        sessionCacheKey = await sessionStore.Store(new WeChatSessionInfo(tokens.OpenId, tokens.SessionKey), Options);
-                }
-
-                try
-                {
-                    var customLoginStateContext = new CustomLoginStateContext(Context, Scheme, Options, tokens, sessionCacheKey);
-                    var customStateAction = Options.CustomLoginState?.Invoke(customLoginStateContext);
-                    if (customStateAction is not null) { await customStateAction; }
-                }
-                catch (Exception ex)
-                {
-                    return HandleRequestResult.Fail(ex);
-                }
+            try
+            {
+                var obtainedContext = new WeChatSessionObtainedContext(Context, Scheme, Options, tokens, sessionCacheKey);
+                var customObtainedAction = obtainedHanlder?.Invoke(obtainedContext);
+                if (customObtainedAction is not null) { await customObtainedAction; }
+            }
+            catch (Exception ex)
+            {
+                return HandleRequestResult.Fail(ex);
             }
 
             return HandleRequestResult.Handle();

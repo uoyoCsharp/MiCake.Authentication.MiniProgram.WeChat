@@ -39,12 +39,6 @@ namespace MiCake.Authentication.MiniProgram.WeChat
         public string WeChatJsCodeQueryString { get; set; } = "code";
 
         /// <summary>
-        /// 根据微信服务器返回的会话密匙进行执行自定义登录态操作.
-        /// 比如颁发Jwt Token，缓存OpenId，重定向至action等操作.
-        /// </summary>
-        public Func<CustomLoginStateContext, Task>? CustomLoginState { get; set; }
-
-        /// <summary>
         /// 是否要保存微信服务端所返回的OpenId和SessionKey到缓存中.
         /// 
         /// <para>
